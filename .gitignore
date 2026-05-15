@@ -1,0 +1,106 @@
+# Go build outputs
+/bin/
+/dist/
+/build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go coverage and profiling
+coverage.out
+coverage.html
+*.cover
+*.prof
+*.pprof
+cpu.out
+mem.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Vendored dependencies
+/vendor/
+
+# Local databases
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+
+# Environment variables and local config
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor swap/backup files
+*.swp
+*.swo
+*.bak
+*.backup
+*~
+
+# JetBrains IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code files
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Vim
+Session.vim
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Generated files
+generated/
+*.generated.*
+
+# Test artifacts
+/test-results/
+/reports/
+
+# Air live-reload tool
+tmp/
+.air.toml
+
+# Delve debugger
+__debug_bin
+debug
+
+# Local binaries
+chemcli
+chemcli.exe
