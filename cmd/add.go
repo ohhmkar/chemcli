@@ -21,7 +21,7 @@ var addCmd = &cobra.Command{
 	Short: "Add medicines to the db",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := db.InitDB()
+		database, err := db.InitDB()
 		if name == "" {
 			fmt.Println("Medicine name required")
 			return
@@ -31,7 +31,7 @@ var addCmd = &cobra.Command{
 			fmt.Println("Quantity must be positive")
 			return
 		}
-		_, err = db.Exec(
+		_, err = database.Exec(
 			"INSERT INTO medicines(name, quantity) VALUES(?, ?) ON CONFLICT(name) DO UPDATE SET quantity = quantity + excluded.quantity;",
 			name,
 			qty,
