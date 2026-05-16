@@ -1,10 +1,11 @@
+package cmd
+
 /*
 Copyright © 2026 Omkar Anil Gajare <theomkargajre@gmail.com>
 */
-package cmd
-
 import (
 	"chemcli/internal/db"
+	"database/sql"
 	"fmt"
 
 	_ "modernc.org/sqlite"
@@ -22,13 +23,23 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		defer database.Close()
+		defer func(database *sql.DB) {
+			err := database.Close()
+			if err != nil {
+				return
+			}
+		}(database)
 
 		rows, err := database.Query("SELECT id,name,quantity from medicines")
 		if err != nil {
 			panic(err)
 		}
-		defer rows.Close()
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				return
+			}
+		}(rows)
 
 		fmt.Println("#\tNAME\tQTY")
 		count := 1
