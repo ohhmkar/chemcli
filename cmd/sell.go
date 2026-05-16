@@ -1,7 +1,7 @@
 package cmd
 
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
+Copyright © 2026 Omkar Anil Gajare <theomkargajre@gmail.com>
 */
 
 import (

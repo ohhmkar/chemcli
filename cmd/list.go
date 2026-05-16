@@ -30,7 +30,7 @@ var listCmd = &cobra.Command{
 			}
 		}(database)
 
-		rows, err := database.Query("SELECT id,name,quantity from medicines")
+		rows, err := database.Query("SELECT id,name,quantity,expiry_date from medicines")
 		if err != nil {
 			panic(err)
 		}
@@ -41,19 +41,20 @@ var listCmd = &cobra.Command{
 			}
 		}(rows)
 
-		fmt.Println("#\tNAME\tQTY")
+		fmt.Println("#\tNAME\tQTY\tExpiry")
 		count := 1
 		for rows.Next() {
 			var id int
 			var name string
 			var qty int
+			var expiry string
 
-			err = rows.Scan(&id, &name, &qty)
+			err = rows.Scan(&id, &name, &qty, &expiry)
 			if err != nil {
 				panic(err)
 			}
 
-			fmt.Printf("%d\t%s\t%d\n", count, name, qty)
+			fmt.Printf("%d\t%s\t%d\t%s\n", count, name, qty, expiry)
 			count++
 		}
 	},

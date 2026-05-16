@@ -15,8 +15,11 @@ func InitDB() (*sql.DB, error) {
 	query := `
 	CREATE TABLE IF NOT EXISTS medicines (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT UNIQUE,
-		quantity INTEGER
+		name TEXT,
+		quantity INTEGER,
+	    expiry_date TEXT,
+	                                     
+		unique(name, expiry_date)
 	);
 	`
 
