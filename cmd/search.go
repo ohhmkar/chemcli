@@ -4,8 +4,7 @@ package cmd
 Copyright © 2026 Omkar Gajare <theomkargajre@gmail.com>
 */
 import (
-	"chemcli/internal/db"
-	"database/sql"
+	"chemcli/internal/core"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -18,60 +17,26 @@ var searchCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			fmt.Println("Usage: chem search <medicine name>")
+			fmt.Println("Usage: chemcli search <medicine name>")
+			return
 		}
 		searchTerm := args[0]
 
-		database, err := db.InitDB()
+		meds, err := core.SearchMedicines(searchTerm)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error searching medicines: %v\n", err)
+			return
 		}
-		defer func(database *sql.DB) {
-			err := database.Close()
-			if err != nil {
 
-			}
-		}(database)
-
-		rows, err := database.Query(`
-			SELECT id, name, quantity
-			FROM medicines
-			WHERE LOWER(name) LIKE LOWER(?)
-		`,
-			"%"+searchTerm+"%",
-		)
-		if err != nil {
-			panic(err)
-		}
-		defer func(rows *sql.Rows) {
-			err := rows.Close()
-			if err != nil {
-
-			}
-		}(rows)
 		fmt.Println("#\tID\tNAME\tQTY")
 
-		found := false
-		count := 1
-		for rows.Next() {
-
-			found = true
-
-			var id int
-			var name string
-			var qty int
-
-			err = rows.Scan(&id, &name, &qty)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Printf("%d\t%d\t%s\t%d\n", count, id, name, qty)
-			count++
+		if len(meds) == 0 {
+			fmt.Println("No medicines found")
+			return
 		}
 
-		if !found {
-			fmt.Println("No medicines found")
+		for i, med := range meds {
+			fmt.Printf("%d\t%d\t%s\t%d\n", i+1, med.ID, med.Name, med.Quantity)
 		}
 	},
 }

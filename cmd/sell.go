@@ -5,9 +5,7 @@ Copyright © 2026 Omkar Anil Gajare <theomkargajre@gmail.com>
 */
 
 import (
-	"chemcli/internal/db"
-	"database/sql"
-	"errors"
+	"chemcli/internal/core"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,53 +30,16 @@ var sellCmd = &cobra.Command{
 			return
 		}
 
-		database, err := db.InitDB()
+		err := core.SellMedicine(sellName, sellQty)
 		if err != nil {
-			panic(err)
-		}
-		defer func(database *sql.DB) {
-			err := database.Close()
-			if err != nil {
-
+			if err == core.ErrNotFound {
+				fmt.Println("Medicine not found")
+			} else if err == core.ErrInsufficientStock {
+				fmt.Printf("Insufficient stock to sell %d units of %s\n", sellQty, sellName)
+			} else {
+				fmt.Printf("Error selling medicine: %v\n", err)
 			}
-		}(database)
-
-		var currentQty int
-
-		err = database.QueryRow(
-			"SELECT quantity FROM medicines WHERE name = ?",
-			sellName,
-		).Scan(&currentQty)
-
-		if errors.Is(err, sql.ErrNoRows) {
-			fmt.Println("Medicine not found")
 			return
-		}
-
-		if err != nil {
-			panic(err)
-		}
-
-		if currentQty < sellQty {
-			fmt.Printf(
-				"Insufficient stock. Available: %d\n",
-				currentQty,
-			)
-			return
-		}
-
-		_, err = database.Exec(
-			`
-			UPDATE medicines
-			SET quantity = quantity - ?
-			WHERE name = ?
-			`,
-			sellQty,
-			sellName,
-		)
-
-		if err != nil {
-			panic(err)
 		}
 
 		fmt.Printf(

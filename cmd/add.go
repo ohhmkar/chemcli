@@ -5,10 +5,8 @@ Copyright © 2026 Omkar Gajare <theomkargajre@gmail.com>
 */
 
 import (
-	"chemcli/internal/db"
+	"chemcli/internal/core"
 	"fmt"
-
-	_ "modernc.org/sqlite"
 
 	"github.com/spf13/cobra"
 )
@@ -23,23 +21,10 @@ var addCmd = &cobra.Command{
 	Short: "Add medicines to the db",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		database, err := db.InitDB()
+		err := core.AddMedicine(name, qty, expiry)
 		if err != nil {
-			panic(err)
-		}
-		defer database.Close()
-
-		_, err = database.Exec(
-			`
-	INSERT INTO medicines(name, quantity, expiry_date) VALUES(?, ?, ?) ON CONFLICT(name,expiry_date) DO UPDATE SET quantity = quantity + excluded.quantity;
-	`,
-			name,
-			qty,
-			expiry,
-		)
-
-		if err != nil {
-			panic(err)
+			fmt.Printf("Error adding medicine: %v\n", err)
+			return
 		}
 		fmt.Println("Added", name, qty)
 	},
