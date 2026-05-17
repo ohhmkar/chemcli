@@ -22,10 +22,40 @@ var guiCmd = &cobra.Command{
 		w := a.NewWindow("ChemCLI - Inventory Manager")
 		w.Resize(fyne.NewSize(600, 400))
 
+		var inventoryData [][]string
+
+		list := widget.NewTable(
+			func() (int, int) { return len(inventoryData), len(inventoryData[0]) },
+			func() fyne.CanvasObject { return widget.NewLabel("Wide Content Here") },
+			func(i widget.TableCellID, o fyne.CanvasObject) {
+				if i.Row < len(inventoryData) && i.Col < len(inventoryData[0]) {
+					o.(*widget.Label).SetText(inventoryData[i.Row][i.Col])
+				}
+			},
+		)
+
+		refreshInventory := func() {
+			meds, err := core.ListMedicines()
+			inventoryData = [][]string{{"ID", "Name", "Quantity", "Expiry"}}
+			if err == nil {
+				for _, m := range meds {
+					inventoryData = append(inventoryData, []string{
+						fmt.Sprintf("%d", m.ID),
+						m.Name,
+						fmt.Sprintf("%d", m.Quantity),
+						m.ExpiryDate,
+					})
+				}
+			}
+			list.Refresh()
+		}
+
+		refreshInventory()
+
 		tabs := container.NewAppTabs(
-			container.NewTabItem("Inventory", createInventoryTab(w)),
-			container.NewTabItem("Add Medicine", createAddTab(w)),
-			container.NewTabItem("Sell", createSellTab(w)),
+			container.NewTabItem("Inventory", container.NewPadded(list)),
+			container.NewTabItem("Add Medicine", createAddTab(w, refreshInventory)),
+			container.NewTabItem("Sell", createSellTab(w, refreshInventory)),
 		)
 		tabs.SetTabLocation(container.TabLocationTop)
 
@@ -34,38 +64,7 @@ var guiCmd = &cobra.Command{
 	},
 }
 
-func createInventoryTab(w fyne.Window) fyne.CanvasObject {
-	meds, err := core.ListMedicines()
-	if err != nil {
-		return widget.NewLabel("Error loading inventory")
-	}
-
-	if len(meds) == 0 {
-		return widget.NewLabel("No medicines in stock.")
-	}
-
-	data := [][]string{{"ID", "Name", "Quantity", "Expiry"}}
-	for _, m := range meds {
-		data = append(data, []string{
-			fmt.Sprintf("%d", m.ID),
-			m.Name,
-			fmt.Sprintf("%d", m.Quantity),
-			m.ExpiryDate,
-		})
-	}
-
-	list := widget.NewTable(
-		func() (int, int) { return len(data), len(data[0]) },
-		func() fyne.CanvasObject { return widget.NewLabel("Wide Content Here") },
-		func(i widget.TableCellID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(data[i.Row][i.Col])
-		},
-	)
-
-	return container.NewPadded(list)
-}
-
-func createAddTab(w fyne.Window) fyne.CanvasObject {
+func createAddTab(w fyne.Window, onSuccess func()) fyne.CanvasObject {
 	nameEntry := widget.NewEntry()
 	qtyEntry := widget.NewEntry()
 	expiryEntry := widget.NewEntry()
@@ -92,6 +91,9 @@ func createAddTab(w fyne.Window) fyne.CanvasObject {
 			nameEntry.SetText("")
 			qtyEntry.SetText("")
 			expiryEntry.SetText("")
+			
+			// Refresh inventory table
+			onSuccess()
 		},
 	}
 
@@ -101,7 +103,7 @@ func createAddTab(w fyne.Window) fyne.CanvasObject {
 	)
 }
 
-func createSellTab(w fyne.Window) fyne.CanvasObject {
+func createSellTab(w fyne.Window, onSuccess func()) fyne.CanvasObject {
 	nameEntry := widget.NewEntry()
 	qtyEntry := widget.NewEntry()
 
@@ -124,6 +126,9 @@ func createSellTab(w fyne.Window) fyne.CanvasObject {
 			dialog.ShowInformation("Success", "Medicine sold!", w)
 			nameEntry.SetText("")
 			qtyEntry.SetText("")
+			
+			// Refresh inventory table
+			onSuccess()
 		},
 	}
 
